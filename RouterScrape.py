@@ -17,7 +17,7 @@ def get_router_names():
     return name_list
 
 
-def download_router_info(name):
+def download_router_info(name, path):
     """Searches for information on a selected vendor and saves response in a text file"""
     passwords_list = []
     name = name.upper()
@@ -29,7 +29,7 @@ def download_router_info(name):
     for tags in soup.findAll("td"):
         passwords_list.append(tags.text)
 
-    pass_write = open("RouterPasswords.txt", "a")
+    pass_write = open(path, "a")
 
     for n, info in enumerate(passwords_list):
         if len(info.split()) > 6:  # Removes random extra data I recieved from HP request

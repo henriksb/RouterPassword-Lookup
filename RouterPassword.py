@@ -1,5 +1,7 @@
+#!/usr/bin/python3
 import RouterScrape
 import argparse
+import platform
 import sys
 import os
 import re
@@ -18,11 +20,16 @@ DOWNLOAD = args["download"]
 if not LIST_ALL and not SEARCH and not DOWNLOAD:
     parser.error('No action requested, add --listall, --search or --download')
 
+if platform.system() == "Windows":
+	PASSWORD_FILE = os.path.dirname(os.path.realpath(__file__)) + "\RouterPasswords.txt"
+else:
+	PASSWORD_FILE = os.path.dirname(os.path.realpath(__file__)) + "/RouterPasswords.txt"
+
 
 def download():
     """Download a file containing all information about the routers"""
     try:
-        os.remove("RouterPasswords.txt")  # Remove old file (if it exists)
+        os.remove(PASSWORD_FILE)  # Remove old file (if it exists)
     except FileNotFoundError:
         pass
 
@@ -32,12 +39,12 @@ def download():
     for n, name in enumerate(router_names):
         sys.stdout.write("\rGrabbing: %-30s (%d%%)" % (name, int(n / progress * 100)))
         sys.stdout.flush()
-        RouterScrape.download_router_info(name)
+        RouterScrape.download_router_info(name, PASSWORD_FILE)
 
 
 def list_all():
     """List all available router vendors"""
-    file_search = open("RouterPasswords.txt", "r").readlines()
+    file_search = open(PASSWORD_FILE, "r").readlines()
     duplicates = []
 
     for manufacturer in file_search:
@@ -60,7 +67,7 @@ def search(search_term):
     username_list = []
     password_list = []
 
-    file_search = open("RouterPasswords.txt", "r").read()
+    file_search = open(PASSWORD_FILE, "r").read()
     search_match = re.findall(r"(^.*?%s.*?$)" % search_term.upper(), file_search, re.MULTILINE)
 
     if not search_match:
@@ -107,13 +114,13 @@ def search(search_term):
 
 if __name__ == "__main__":
     if LIST_ALL:
-        if os.path.exists("RouterPasswords.txt"):
+        if os.path.exists(PASSWORD_FILE):
             list_all()
         else:
             print("[!] RouterPasswords.txt not found. Please use the --download option to get it")
 
     if SEARCH:
-        if os.path.exists("RouterPasswords.txt"):
+        if os.path.exists(PASSWORD_FILE):
             search(SEARCH)
         else:
             print("[!] RouterPasswords.txt not found. Please use the --download option to get it")
