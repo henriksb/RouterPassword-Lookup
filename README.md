@@ -1,6 +1,6 @@
 # Router Password Lookup
 
-Cross-platform script that scrapes all information from http://www.routerpasswords.com/ and saves it on your computer that allows for quick searching with nicely formatted output.
+Cross-platform script that scrapes all information from http://www.routerpasswords.com/ and saves it on your computer. A list is then generated, which allows for quick searching with a nicely formatted output.
 
 ![GIF](https://raw.githubusercontent.com/henriksb/RouterPassword-Lookup/master/RouterPasswordGIF.gif)
 
