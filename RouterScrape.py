@@ -21,13 +21,13 @@ def download_router_info(name, path):
     """Searches for information on a selected vendor and saves response in a text file"""
     passwords_list = []
     name = name.upper()
-    params = {"findpass": 1, "router": f"{name}", "findpassword": "Find Password"}
+    #params = {"findpass": 1, "router": f"{name}", "findpassword": "Find Password"}
 
-    soup = requests.post(url=ROUTER_URL, data=params)
+    soup = requests.post(url=ROUTER_URL+"/router-password/"+name)
     soup = BeautifulSoup(soup.text, "lxml")
 
     for tags in soup.findAll("td"):
-        passwords_list.append(tags.text)
+        passwords_list.append(tags.text.replace("\n", "").replace("\r", ""))
 
     pass_write = open(path, "a")
 
