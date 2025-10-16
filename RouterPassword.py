@@ -21,7 +21,7 @@ if not LIST_ALL and not SEARCH and not DOWNLOAD:
     parser.error('No action requested, add --listall, --search or --download')
 
 if platform.system() == "Windows":
-	PASSWORD_FILE = os.path.dirname(os.path.realpath(__file__)) + "\RouterPasswords.txt"
+	PASSWORD_FILE = os.path.dirname(os.path.realpath(__file__)) + "\\RouterPasswords.txt"
 else:
 	PASSWORD_FILE = os.path.dirname(os.path.realpath(__file__)) + "/RouterPasswords.txt"
 
@@ -48,7 +48,7 @@ def list_all():
     duplicates = []
 
     for manufacturer in file_search:
-        manuf = manufacturer.split(" ")[0]
+        manuf = manufacturer.split(",")[0]
 
         if manuf in duplicates:  # Skip duplicates
             continue
@@ -60,56 +60,48 @@ def list_all():
 
 
 def search(search_term):
-    """Search for keywords and display all matches"""
+    """Search for keywords and display all matches (comma-separated format)"""
     manuf_list = []
     model_list = []
     protocol_list = []
     username_list = []
     password_list = []
 
-    file_search = open(PASSWORD_FILE, "r").read()
-    search_match = re.findall(r"(^.*?%s.*?$)" % search_term.upper(), file_search, re.MULTILINE)
+    with open(PASSWORD_FILE, "r", encoding="utf-8") as f:
+        file_search = f.read()
+
+    # Match lines containing the search term (case-insensitive)
+    search_match = re.findall(rf"(^.*?{re.escape(search_term)}.*?$)", file_search, re.MULTILINE | re.IGNORECASE)
 
     if not search_match:
         print("[!] Search gave no results")
         return
 
-    # Text formatting
-    print("\nMANUFACTURER:MODEL:PROTOCOL:USERNAME:PASSWORD")  # Display format
-    print("---------------------------------------------")
+    print("\nMANUFACTURER,MODEL,PROTOCOL,USERNAME,PASSWORD")
+    print("--------------------------------------------------")
+
     for match in search_match:
-        match = match.split(" " * 2)
-        match = list(filter(None, match))
+        # Split by commas instead of spaces
+        match = match.strip().split(",")
 
-        # Fixing broken/incomplete input
-        try:
-            manuf_list.append(match[0])
-        except IndexError:
-            password_list.append("(empty)")
-        try:
-            model_list.append(match[1])
-        except IndexError:
-            password_list.append("(empty)")
-        try:
-            protocol_list.append(match[2])
-        except IndexError:
-            password_list.append("(empty)")
-        try:
-            username_list.append(match[3])
-        except IndexError:
-            password_list.append("(empty)")
-        try:
-            password_list.append(match[4])
-        except IndexError:
-            password_list.append("(empty)")
+        # Fill missing values
+        while len(match) < 5:
+            match.append("(empty)")
 
+        manuf_list.append(match[0].strip())
+        model_list.append(match[1].strip())
+        protocol_list.append(match[2].strip())
+        username_list.append(match[3].strip())
+        password_list.append(match[4].strip())
+
+    # Align columns dynamically
     for i in range(len(manuf_list)):
         print("%-*s   %-*s   %-*s   %-*s   %-*s" %
-              (len(max(manuf_list, key=len)), manuf_list[i].strip(),
-               len(max(model_list, key=len)), model_list[i].strip(),
-               len(max(protocol_list, key=len)), protocol_list[i].strip(),
-               len(max(username_list, key=len)), username_list[i].strip(),
-               len(max(password_list, key=len)), password_list[i].strip()))
+              (len(max(manuf_list, key=len)), manuf_list[i],
+               len(max(model_list, key=len)), model_list[i],
+               len(max(protocol_list, key=len)), protocol_list[i],
+               len(max(username_list, key=len)), username_list[i],
+               len(max(password_list, key=len)), password_list[i]))
 
 
 if __name__ == "__main__":

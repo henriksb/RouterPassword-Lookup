@@ -29,12 +29,9 @@ def download_router_info(name, path):
     for tags in soup.findAll("td"):
         passwords_list.append(tags.text.replace("\n", "").replace("\r", ""))
 
-    pass_write = open(path, "a")
-
-    for n, info in enumerate(passwords_list):
-        if len(info.split()) > 6:  # Removes random extra data I recieved from HP request
-            continue
-        pass_write.write("%-*s".strip("\n") % (108, info))
-        if (n + 1) % 5 == 0: pass_write.write("\n")
-
-    pass_write.close()
+    with open(path, "a", encoding="utf-8", newline="") as pass_write:
+        for n, info in enumerate(passwords_list):
+            # write value and a comma unless it’s the 5th item (then newline)
+            end_char = "\n" if (n + 1) % 5 == 0 else ","
+            pass_write.write(info.replace("\n", "").replace("\r", ""))
+            pass_write.write(end_char)
